@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    title= title
+  body
+    h1 Pet List
+    a(href="/update-cobj") Add to this table
+    table(border="1")
+      tr
+        th Name
+        th Species
+        th Legs
+      each pet in pets
+        tr
+          td= pet.properties.name
+          td= pet.properties.species
+          td= pet.properties.legs
