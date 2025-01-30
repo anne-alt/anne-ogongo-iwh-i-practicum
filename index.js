@@ -19,12 +19,19 @@ console.log('PRIVATE_APP_ACCESS:', PRIVATE_APP_ACCESS ? 'Loaded successfully' : 
 app.get('/', async (req, res) => {
     try {
         const response = await axios.get('https://api.hubapi.com/crm/v3/objects/pets', {
-            headers: { 'Authorization': `Bearer ${PRIVATE_APP_ACCESS}` }
+            headers: { 'Authorization': `Bearer ${PRIVATE_APP_ACCESS}` },
+            params: {
+                properties: ['name', 'species', 'legs'].join(',') 
+            }
         });
-        res.render('updates', { title: 'Pet List', pets: response.data.results });
+
+        console.log('API Response:', response.data); 
+        const pets = response.data.results || [];
+        console.log('Pets with Properties:', pets); 
+        res.render('homepage', { title: 'Pet List', pets });
     } catch (error) {
         console.error('Error fetching pet data:', error);
-        res.status(500).send('Error fetching data');
+        res.render('homepage', { title: 'Pet List', pets: [] });
     }
 });
 
@@ -42,7 +49,6 @@ app.get('/update-cobj', (req, res) => {
 
 app.post('/update-cobj', async (req, res) => {
     const { name, species, legs } = req.body;
-    
     try {
         await axios.post('https://api.hubapi.com/crm/v3/objects/pets', {
             properties: { 
@@ -59,51 +65,6 @@ app.post('/update-cobj', async (req, res) => {
         res.status(500).send('Error submitting data');
     }
 });
-
-/** 
-* * This is sample code to give you a reference for how you should structure your calls. 
-
-* * App.get sample
-app.get('/contacts', async (req, res) => {
-    const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    }
-    try {
-        const resp = await axios.get(contacts, { headers });
-        const data = resp.data.results;
-        res.render('contacts', { title: 'Contacts | HubSpot APIs', data });      
-    } catch (error) {
-        console.error(error);
-    }
-});
-
-* * App.post sample
-app.post('/update', async (req, res) => {
-    const update = {
-        properties: {
-            "favorite_book": req.body.newVal
-        }
-    }
-
-    const email = req.query.email;
-    const updateContact = `https://api.hubapi.com/crm/v3/objects/contacts/${email}?idProperty=email`;
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    };
-
-    try { 
-        await axios.patch(updateContact, update, { headers } );
-        res.redirect('back');
-    } catch(err) {
-        console.error(err);
-    }
-
-});
-*/
-
 
 // * Localhost
 app.listen(3000, () => console.log('Listening on http://localhost:3000'));
